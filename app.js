@@ -7,21 +7,24 @@ const port = 3000;
 
 // Object to organize the data
 const organizedDataObject = {};
+let numberOfLoyalVisitors = 0;
 
 // Reading CSV file
-fs.createReadStream('data-reduced.csv')
+fs.createReadStream('data.csv')
   .pipe(csvParse())
   .on('data', (row) => {
+    // Process row
     try {
-      // Process row
-      // console.log(row);
-      // Checks if user ID is in the organizedDataObject
+      // Checks if user ID is already in the organizedDataObject
       if(organizedDataObject[row[1]]) {
         // Updates organizedDataObject
         organizedDataObject[row[1]].count++;
         organizedDataObject[row[1]].os.push(row[2]);
         organizedDataObject[row[1]].device.push(row[3]);
         organizedDataObject[row[1]].datetime.push(row[0]);
+        if(organizedDataObject[row[1]].count > 9) {
+          numberOfLoyalVisitors++;
+        }
       } else {
         // Or creates a new user
         organizedDataObject[row[1]] = {
@@ -39,6 +42,8 @@ fs.createReadStream('data-reduced.csv')
   .on('end', () => {
     console.log("Finished");
     console.log(organizedDataObject);
+    console.log("Number of Unique Website Visitors: " + Object.keys(organizedDataObject).length);
+    console.log("Number of Loyal Website Visitor: " + numberOfLoyalVisitors);
   });
 
 
