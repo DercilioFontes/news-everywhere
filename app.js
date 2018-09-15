@@ -10,7 +10,9 @@ const organizedDataObject = {};
 let numberOfLoyalVisitors = 0;
 
 // Reading CSV file
-fs.createReadStream('data.csv')
+const startTime = new Date();
+console.log("Start time: " + startTime);
+fs.createReadStream('data-reduced.csv')
   .pipe(csvParse())
   .on('data', (row) => {
     // Process row
@@ -22,7 +24,10 @@ fs.createReadStream('data.csv')
         organizedDataObject[row[1]].os.push(row[2]);
         organizedDataObject[row[1]].device.push(row[3]);
         organizedDataObject[row[1]].datetime.push(row[0]);
-        if(organizedDataObject[row[1]].count > 9) {
+        // Checks if is not a Loyal Visitor yet and has 10 or more visits
+        if(!organizedDataObject[row[1]].isLoyalVisitor && organizedDataObject[row[1]].count > 9) {
+          // So sets true and count
+          organizedDataObject[row[1]].isLoyalVisitor = true;
           numberOfLoyalVisitors++;
         }
       } else {
@@ -33,6 +38,7 @@ fs.createReadStream('data.csv')
           os: [row[2]],
           device: [row[3]],
           datetime: [row[0]],
+          isLoyalVisitor: false,
         };
       }
     } catch(error) {
@@ -40,7 +46,9 @@ fs.createReadStream('data.csv')
     }
   })
   .on('end', () => {
-    console.log("Finished");
+    const endTime = new Date();
+    console.log("End time: " + endTime);
+    // console.log("Time to process: " (endTime - startTime));
     console.log(organizedDataObject);
     console.log("Number of Unique Website Visitors: " + Object.keys(organizedDataObject).length);
     console.log("Number of Loyal Website Visitor: " + numberOfLoyalVisitors);
